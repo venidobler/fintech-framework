@@ -7,23 +7,23 @@
 - Venícius Dobler
 - Vitor parente
 
-Este repositório representa o **Mini-Framework** de exportação de relatórios da Fintech. Ele aplica o **Princípio de Hollywood ("Don't call us, we'll call you")** para ditar o fluxo de execução, permitindo que diferentes formatos e destinos sejam acoplados.
+Este repositório representa o **Mini-Framework** de validação financeira da Fintech. Ele aplica o **Princípio de Hollywood ("Don't call us, we'll call you")** para ditar o fluxo de execução, permitindo que diferentes regras de negócio sejam acopladas à esteira principal.
 
 ## 🎯 Objetivo
-Demonstrar a aplicação prática de Inversão de Controle (IoC) através de arquiteturas **White-box** e **Black-box**, integrando componentes reutilizáveis.
+Demonstrar a aplicação prática de Inversão de Controle (IoC) através de arquiteturas **White-box** e **Black-box**, integrando o componente de domínio `validator-core` (Repositório 1).
 
 ## 🚀 Estrutura do Framework
 
 ### 1. Módulo White-box (Herança)
 Implementado no pacote `whitebox`, utiliza o padrão **Template Method**.
-- **Classe Base:** `ExportadorRelatorioWhiteBox` define o esqueleto do algoritmo.
-- **Extensão:** O cliente estende a classe e implementa os métodos "gancho" (hooks) para definir o comportamento específico.
+- **Classe Base:** `ValidadorFinanceiroWhiteBox` define o esqueleto do algoritmo.
+- **Extensão:** O cliente estende a classe e implementa os métodos "gancho" (hooks) para definir o comportamento específico (ex: `ValidadorPixWhiteBox`).
 
 ### 2. Módulo Black-box (Composição)
 Implementado no pacote `blackbox`, utiliza os padrões **Strategy e Factory**.
-- **Motor:** `MotorExportacaoBlackBox` é agnóstico às implementações concretas.
-- **Contratos:** Baseado nas interfaces `FormatoRelatorio` e `DestinoRelatorio`.
-- **Injeção:** As dependências são injetadas via construtor.
+- **Motor:** `MotorValidacaoBlackBox` é agnóstico às implementações concretas.
+- **Contratos:** Baseado na interface `RegraValidacaoFinanceira`.
+- **Injeção:** As dependências (regras específicas) são injetadas via construtor.
 
 ## 🛡️ Defesa Arquitetural
 
@@ -42,11 +42,10 @@ A indústria moderna (como o ecossistema Spring) prefere a abordagem **Black-box
 #### No White-box (Herança):
 A IoC ocorre quando o método `final` da classe pai chama os métodos abstratos que serão implementados pelo cliente:
 ```java
-// Arquivo: ExportadorRelatorioWhiteBox.java
-public final void exportar(DadosRelatorio dados) {
+// Arquivo: ValidadorFinanceiroWhiteBox.java
+public final boolean executarFluxoValidacao(Documento doc) {
     // ...
-    String cabecalho = formatarCabecalho(dados); // <--- IoC: Framework chamando o código do cliente
-    String corpo = formatarCorpo(dados);         // <--- IoC
+    boolean isValido = validarRegraEspecifica(doc); // <--- IoC: Framework chamando o código do cliente
     // ...
 }
 ```
@@ -54,11 +53,10 @@ public final void exportar(DadosRelatorio dados) {
 #### No Black-box (Composição):
 A IoC ocorre quando o motor delega a execução para as interfaces injetadas, sem saber qual a implementação concreta:
 ```java
-// Arquivo: MotorExportacaoBlackBox.java
-public void exportar(DadosRelatorio dados) {
+// Arquivo: MotorValidacaoBlackBox.java
+public boolean executarFluxo(Documento doc) {
     // ...
-    String conteudo = formato.formatar(dados); // <--- IoC: Framework delegando para a estratégia
-    destino.gravar(nomeArquivo, conteudo);     // <--- IoC
+    boolean isValido = regra.validar(doc); // <--- IoC: Framework delegando para a estratégia
     // ...
 }
 ```
